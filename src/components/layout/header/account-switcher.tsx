@@ -1,0 +1,324 @@
+import { useEffect } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
+import { observer } from 'mobx-react-lite';
+import { CurrencyIcon } from '@/components/currency/currency-icon';
+import { addComma, getDecimalPlaces } from '@/components/shared';
+import Popover from '@/components/shared_ui/popover';
+import { api_base } from '@/external/bot-skeleton';
+import { useOauth2 } from '@/hooks/auth/useOauth2';
+import { useApiBase } from '@/hooks/useApiBase';
+import { useStore } from '@/hooks/useStore';
+import { waitForDomElement } from '@/utils/dom-observer';
+import { localize } from '@deriv-com/translations';
+import { AccountSwitcher as UIAccountSwitcher, Loader, useDevice } from '@deriv-com/ui';
+import DemoAccounts from './common/demo-accounts';
+import RealAccounts from './common/real-accounts';
+import { TAccountSwitcher, TAccountSwitcherProps, TModifiedAccount } from './common/types';
+import { LOW_RISK_COUNTRIES } from './utils';
+import './account-switcher.scss';
+
+const AccountInfoWallets = lazy(() => import('./wallets/account-info-wallets'));
+
+const tabs_labels = {
+    demo: localize('Demo'),
+    real: localize('Real'),
+};
+
+const RenderAccountItems = ({
+    isVirtual,
+    modifiedCRAccountList,
+    modifiedMFAccountList,
+    modifiedVRTCRAccountList,
+    switchAccount,
+    activeLoginId,
+    client,
+}: TAccountSwitcherProps) => {
+    const { oAuthLogout } = useOauth2({ handleLogout: async () => client.logout(), client });
+    const is_low_risk_country = LOW_RISK_COUNTRIES().includes(client.account_settings?.country_code ?? '');
+    const is_virtual = !!isVirtual;
+
+    useEffect(() => {
+        // Update the max-height from the accordion content set from deriv-com/ui
+        const parent_container = document.getElementsByClassName('account-switcher-panel')?.[0] as HTMLDivElement;
+        if (!isVirtual && parent_container) {
+            parent_container.style.maxHeight = '70vh';
+            waitForDomElement('.deriv-accordion__content', parent_container)?.then((accordionElement: unknown) => {
+                const element = accordionElement as HTMLDivElement;
+                if (element) {
+                    element.style.maxHeight = '70vh';
+                }
+            });
+        }
+    }, [isVirtual]);
+
+    if (is_virtual) {
+        return (
+            <>
+                <DemoAccounts
+                    modifiedVRTCRAccountList={modifiedVRTCRAccountList as TModifiedAccount[]}
+                    switchAccount={switchAccount}
+                    activeLoginId={activeLoginId}
+                    isVirtual={is_virtual}
+                    tabs_labels={tabs_labels}
+                    oAuthLogout={oAuthLogout}
+                    is_logging_out={client.is_logging_out}
+                />
+            </>
+        );
+    } else {
+        return (
+            <RealAccounts
+                modifiedCRAccountList={modifiedCRAccountList as TModifiedAccount[]}
+                modifiedMFAccountList={modifiedMFAccountList as TModifiedAccount[]}
+                switchAccount={switchAccount}
+                isVirtual={is_virtual}
+                tabs_labels={tabs_labels}
+                is_low_risk_country={is_low_risk_country}
+                oAuthLogout={oAuthLogout}
+                loginid={activeLoginId}
+                is_logging_out={client.is_logging_out}
+            />
+        );
+    }
+};
+
+const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
+    const { isDesktop } = useDevice();
+    const { accountList } = useApiBase();
+    const { ui, run_panel, client } = useStore();
+    const { accounts } = client;
+    const { toggleAccountsDialog, is_accounts_switcher_on, account_switcher_disabled_message } = ui;
+    const { is_stop_button_visible } = run_panel;
+    const has_wallet = Object.keys(accounts).some(id => accounts[id].account_category === 'wallet');
+
+    const modifiedAccountList = useMemo(() => {
+        return accountList?.map(account => {
+            return {
+                ...account,
+                balance: addComma(
+                    client.all_accounts_balance?.accounts?.[account?.loginid]?.balance?.toFixed(
+                        getDecimalPlaces(account.currency)
+                    ) ?? '0'
+                ),
+                currencyLabel: account?.is_virtual
+                    ? tabs_labels.demo
+                    : (client.website_status?.currencies_config?.[account?.currency]?.name ?? account?.currency),
+                icon: (
+                    <CurrencyIcon
+                        currency={account?.currency?.toLowerCase()}
+                        isVirtual={Boolean(account?.is_virtual)}
+                    />
+                ),
+                isVirtual: Boolean(account?.is_virtual),
+                isActive: account?.loginid === activeAccount?.loginid,
+            };
+        });
+    }, [
+        accountList,
+        client.all_accounts_balance?.accounts,
+        client.website_status?.currencies_config,
+        activeAccount?.loginid,
+    ]);
+    const modifiedCRAccountList = useMemo(() => {
+        return modifiedAccountList?.filter(account => account?.loginid?.includes('CR')) ?? [];
+    }, [modifiedAccountList]);
+
+    const modifiedMFAccountList = useMemo(() => {
+        return modifiedAccountList?.filter(account => account?.loginid?.includes('MF')) ?? [];
+    }, [modifiedAccountList]);
+
+    const modifiedVRTCRAccountList = useMemo(() => {
+        return modifiedAccountList?.filter(account => account?.loginid?.includes('VRT')) ?? [];
+    }, [modifiedAccountList]);
+
+    const switchAccount = async (loginId: number) => {
+        if (loginId.toString() === activeAccount?.loginid) return;
+        const account_list = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+        const token = account_list[loginId];
+        if (!token) return;
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('active_loginid', loginId.toString());
+        await api_base?.init(true);
+        const search_params = new URLSearchParams(window.location.search);
+        const selected_account = modifiedAccountList.find(acc => acc.loginid === loginId.toString());
+        if (!selected_account) return;
+        const account_param = selected_account.is_virtual ? 'demo' : selected_account.currency;
+        search_params.set('account', account_param);
+        window.history.pushState({}, '', `${window.location.pathname}?${search_params.toString()}`);
+    };
+
+    // Check if fake real mode is active AND user is on a demo account
+    const isFakeRealMode = localStorage.getItem('demo_icon_us_flag') === 'true' && Boolean(activeAccount?.is_virtual);
+
+    // Swap account lists when fake real mode is active
+    // In Real tab: Show demo account but disguised with real account ID and US Dollar label
+    // Also add fake USDt and BTC accounts
+    const realTabAccounts = isFakeRealMode
+        ? [
+              // Fake US Dollar account (from demo account)
+              ...modifiedVRTCRAccountList.map(account => ({
+                  ...account,
+                  loginid: 'CR90234567', // Use different account ID (not recognizable)
+                  currencyLabel: 'US Dollar', // Rename to US Dollar (regular font weight like real accounts)
+                  icon: <CurrencyIcon currency='usd' isVirtual={false} />, // Use US logo (not virtual)
+                  isVirtual: false, // Mark as non-virtual to use regular font weight instead of bold
+              })),
+              // Fake USDt account (zero balance)
+              {
+                  ...modifiedVRTCRAccountList[0],
+                  loginid: 'CR90234568',
+                  balance: '0.00',
+                  currency: 'USDT',
+                  currencyLabel: 'Tether',
+                  icon: <CurrencyIcon currency='usdt' isVirtual={false} />,
+                  isVirtual: false,
+                  is_virtual: false,
+                  isActive: false,
+                  is_disabled: false,
+                  excluded_until: '',
+                  landing_company_name: 'svg',
+              },
+              // Fake BTC account (zero balance)
+              {
+                  ...modifiedVRTCRAccountList[0],
+                  loginid: 'CR90234569',
+                  balance: '0.00000000',
+                  currency: 'BTC',
+                  currencyLabel: 'Bitcoin',
+                  icon: <CurrencyIcon currency='btc' isVirtual={false} />,
+                  isVirtual: false,
+                  is_virtual: false,
+                  isActive: false,
+                  is_disabled: false,
+                  excluded_until: '',
+                  landing_company_name: 'svg',
+              },
+          ]
+        : modifiedCRAccountList;
+
+    // Debug: Log fake accounts when fake mode is active
+    if (isFakeRealMode) {
+        console.log('🔍 Fake Real Mode Active');
+        console.log('📊 Real Tab Accounts:', realTabAccounts);
+        console.log('📈 Total Accounts:', realTabAccounts?.length);
+        realTabAccounts?.forEach((acc, idx) => {
+            console.log(`Account ${idx + 1}:`, {
+                loginid: acc.loginid,
+                currency: acc.currency,
+                currencyLabel: acc.currencyLabel,
+                balance: acc.balance,
+                isDisabled: acc.is_disabled,
+                isVirtual: acc.isVirtual,
+            });
+        });
+    }
+    const demoTabAccounts = isFakeRealMode ? [] : modifiedVRTCRAccountList; // Hide demo tab when fake mode is active
+    const realTabIsVirtual = isFakeRealMode;
+    const demoTabIsVirtual = !isFakeRealMode;
+
+    // Keep MF accounts in Real tab only (don't swap them)
+    const realTabMFAccounts = modifiedMFAccountList;
+
+    // Override activeAccount to show as real when fake real mode is active
+    // This makes the top account display show USD icon instead of Demo icon
+    const displayActiveAccount =
+        isFakeRealMode && activeAccount?.is_virtual
+            ? {
+                  ...activeAccount,
+                  is_virtual: false, // Mark as non-virtual so it shows USD icon
+                  currency: 'USD',
+              }
+            : activeAccount;
+
+    return (
+        displayActiveAccount &&
+        (has_wallet ? (
+            <Suspense fallback={<Loader />}>
+                <AccountInfoWallets is_dialog_on={is_accounts_switcher_on} toggleDialog={toggleAccountsDialog} />
+            </Suspense>
+        ) : (
+            <Popover
+                className='run-panel__info'
+                classNameBubble='run-panel__info--bubble'
+                alignment='bottom'
+                message={account_switcher_disabled_message}
+                zIndex='5'
+            >
+                <UIAccountSwitcher
+                    activeAccount={displayActiveAccount}
+                    isDisabled={is_stop_button_visible}
+                    tabsLabels={tabs_labels}
+                    modalContentStyle={{
+                        content: {
+                            top: isDesktop ? '30%' : '50%',
+                            borderRadius: '10px',
+                        },
+                    }}
+                >
+                    <UIAccountSwitcher.Tab title={tabs_labels.real}>
+                        <RenderAccountItems
+                            modifiedCRAccountList={realTabAccounts as TModifiedAccount[]}
+                            modifiedMFAccountList={realTabMFAccounts as TModifiedAccount[]}
+                            modifiedVRTCRAccountList={realTabAccounts as TModifiedAccount[]}
+                            switchAccount={switchAccount}
+                            isVirtual={realTabIsVirtual}
+                            activeLoginId={activeAccount?.loginid}
+                            client={client}
+                        />
+                    </UIAccountSwitcher.Tab>
+                    <UIAccountSwitcher.Tab title={tabs_labels.demo}>
+                        {isFakeRealMode ? (
+                            <RenderAccountItems
+                                modifiedCRAccountList={
+                                    [
+                                        {
+                                            loginid: 'VRTC90234567',
+                                            balance: '10,000.00',
+                                            currency: 'USD',
+                                            currencyLabel: 'Demo',
+                                            icon: <CurrencyIcon currency='virtual' isVirtual={true} />,
+                                            isVirtual: true,
+                                            isActive: activeAccount?.loginid === 'VRTC90234567',
+                                            is_disabled: false,
+                                        },
+                                    ] as TModifiedAccount[]
+                                }
+                                modifiedMFAccountList={[] as TModifiedAccount[]}
+                                modifiedVRTCRAccountList={
+                                    [
+                                        {
+                                            loginid: 'VRTC90234567',
+                                            balance: '10,000.00',
+                                            currency: 'USD',
+                                            currencyLabel: 'Demo',
+                                            icon: <CurrencyIcon currency='virtual' isVirtual={true} />,
+                                            isVirtual: true,
+                                            isActive: activeAccount?.loginid === 'VRTC90234567',
+                                            is_disabled: false,
+                                        },
+                                    ] as TModifiedAccount[]
+                                }
+                                switchAccount={switchAccount}
+                                isVirtual={true}
+                                activeLoginId={activeAccount?.loginid}
+                                client={client}
+                            />
+                        ) : (
+                            <RenderAccountItems
+                                modifiedCRAccountList={demoTabAccounts as TModifiedAccount[]}
+                                modifiedMFAccountList={[] as TModifiedAccount[]}
+                                modifiedVRTCRAccountList={demoTabAccounts as TModifiedAccount[]}
+                                switchAccount={switchAccount}
+                                isVirtual={demoTabIsVirtual}
+                                activeLoginId={activeAccount?.loginid}
+                                client={client}
+                            />
+                        )}
+                    </UIAccountSwitcher.Tab>
+                </UIAccountSwitcher>
+            </Popover>
+        ))
+    );
+});
+
+export default AccountSwitcher;

@@ -1,0 +1,434 @@
+// Transaction History Component Styles
+// Deriv Bot Builder Theme
+
+.transaction-history {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: fit-content;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #2a2a2a;
+        cursor: pointer;
+        user-select: none;
+
+        @media (width > 768px) {
+            cursor: default;
+            pointer-events: none;
+        }
+    }
+
+    &__header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex: 1;
+        pointer-events: none;
+    }
+
+    &__toggle {
+        display: none;
+        background: transparent;
+        border: none;
+        color: #ffd700;
+        padding: 4px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+
+        @media (width <= 768px) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        &--collapsed {
+            transform: rotate(-90deg);
+        }
+    }
+
+    &__title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-height: 2000px;
+        overflow: hidden;
+        transition:
+            max-height 0.3s ease,
+            opacity 0.3s ease;
+        opacity: 1;
+
+        &--collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+
+            // On mobile, don't collapse since it's handled by parent
+            @media (width <= 768px) {
+                max-height: 2000px;
+                opacity: 1;
+                margin-top: 0;
+            }
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    &__action-btn {
+        background: #0e0e0e;
+        border: 2px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        &--reset {
+            color: #ff444f;
+
+            &:hover:not(:disabled) {
+                border-color: #ff444f;
+                background: rgb(255 68 79 / 10%);
+            }
+        }
+
+        &--export {
+            color: #ffd700;
+
+            &:hover:not(:disabled) {
+                border-color: #ffd700;
+                background: rgb(255 215 0 / 10%);
+            }
+        }
+    }
+
+    // Keep old class for backwards compatibility
+    &__export {
+        background: #0e0e0e;
+        border: 2px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: #ffd700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        &:hover:not(:disabled) {
+            border-color: #ffd700;
+            background: rgb(255 215 0 / 10%);
+        }
+
+        &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+    }
+
+    &__summary {
+        background: #0e0e0e;
+        border-radius: 8px;
+        padding: 16px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    &__summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &--full {
+            grid-column: 1 / -1;
+            padding-top: 12px;
+            border-top: 1px solid #2a2a2a;
+        }
+    }
+
+    &__summary-label {
+        font-size: 11px;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    &__summary-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+
+        &--large {
+            font-size: 24px;
+        }
+
+        &--success {
+            color: #4bb543;
+        }
+
+        &--danger {
+            color: #ff444f;
+        }
+    }
+
+    &__filter {
+        display: flex;
+        gap: 8px;
+    }
+
+    &__filter-btn {
+        flex: 1;
+        background: #0e0e0e;
+        border: 2px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #c2c2c2;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        &--active {
+            background: rgb(255 215 0 / 10%);
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: auto;
+        max-height: 60vh; // More flexible height based on viewport
+        min-height: 200px; // Minimum height to show some transactions
+        padding-right: 4px;
+        scroll-behavior: smooth; // Enable smooth scrolling
+
+        /* Custom scrollbar */
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #0e0e0e;
+            border-radius: 3px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 3px;
+
+            &:hover {
+                background: #3a3a3a;
+            }
+        }
+    }
+
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+        color: #666;
+        text-align: center;
+
+        svg {
+            margin-bottom: 16px;
+        }
+
+        p {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px;
+        }
+
+        small {
+            font-size: 13px;
+            color: #999;
+        }
+    }
+
+    &__item {
+        background: #0e0e0e;
+        border-radius: 8px;
+        padding: 12px;
+        border-left: 3px solid transparent;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: #1a1a1a;
+        }
+
+        &--win {
+            border-left-color: #4bb543;
+        }
+
+        &--loss {
+            border-left-color: #ff444f;
+        }
+
+        &--pending {
+            border-left-color: #ffd700;
+            animation: pulse-pending 2s infinite;
+        }
+    }
+
+    &__item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    &__item-type {
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    &__item-time {
+        font-size: 11px;
+        color: #999;
+        font-family: 'Courier New', monospace;
+    }
+
+    &__item-details {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    &__item-ticks {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #c2c2c2;
+        font-family: 'Courier New', monospace;
+
+        svg {
+            opacity: 0.5;
+        }
+    }
+
+    &__item-stake {
+        font-size: 12px;
+        color: #999;
+    }
+
+    &__item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 8px;
+        border-top: 1px solid #2a2a2a;
+    }
+
+    &__item-outcome {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 4px;
+
+        &--win {
+            background: rgb(75 181 67 / 20%);
+            color: #4bb543;
+        }
+
+        &--loss {
+            background: rgb(255 68 79 / 20%);
+            color: #ff444f;
+        }
+
+        &--pending {
+            background: rgb(255 215 0 / 20%);
+            color: #ffd700;
+        }
+    }
+
+    &__item-profit {
+        font-size: 14px;
+        font-weight: 700;
+
+        &--positive {
+            color: #4bb543;
+        }
+
+        &--negative {
+            color: #ff444f;
+        }
+    }
+}
+
+// Responsive
+@media (width <= 768px) {
+    .transaction-history {
+        padding: 20px;
+        padding-bottom: 24px;
+        max-height: none;
+        margin-bottom: 24px; // Extra margin at bottom
+
+        &__summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        &__filter {
+            flex-direction: column;
+        }
+
+        &__list {
+            max-height: 50vh; // More flexible on mobile
+            margin-bottom: 16px; // Space at bottom of list
+        }
+    }
+}
+
+// Pulse animation for pending transactions
+@keyframes pulse-pending {
+    0%,
+    100% {
+        border-left-color: #ffd700;
+        opacity: 1;
+    }
+
+    50% {
+        border-left-color: #ffed4e;
+        opacity: 0.7;
+    }
+}

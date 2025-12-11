@@ -1,0 +1,327 @@
+// Fast Lane Trading System Styles
+// Deriv Bot Builder Theme
+
+// Fast Lane Container - Fixed height with scrolling
+.fast-lane-container {
+    height: calc(100vh - 120px); // Full height minus header/navigation
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    background: #0e0e0e;
+
+    // Custom scrollbar
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 215 0 / 50%) rgb(42 42 42 / 50%);
+
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgb(42 42 42 / 50%);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgb(255 215 0 / 50%);
+        border-radius: 4px;
+
+        &:hover {
+            background: rgb(255 215 0 / 70%);
+        }
+    }
+}
+
+.fast-lane {
+    padding: 24px;
+    padding-bottom: 60px; // Padding at bottom for scroll space
+    width: 100%;
+    color: #fff;
+    min-height: 100%; // Allow content to expand
+
+    &__header {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0 0 8px;
+        color: #fff;
+    }
+
+    &__beta-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #0e0e0e;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    &__description {
+        font-size: 14px;
+        color: #c2c2c2;
+        margin: 0;
+        max-width: 600px;
+    }
+
+    &__auth-container {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    &__content {
+        width: 100%;
+        max-width: 100%;
+        min-height: auto;
+    }
+
+    // Desktop Layout
+    &__desktop-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr 350px;
+        gap: 16px;
+        align-items: start;
+        width: 100%;
+        max-width: 100%;
+        min-height: auto;
+
+        @media (width <= 1200px) {
+            grid-template-columns: 1fr 1fr;
+
+            .fast-lane__sidebar:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (width <= 768px) {
+            display: none; // Hide desktop layout on mobile
+        }
+    }
+
+    // Mobile Layout - Collapsible Sections
+    &__mobile-layout {
+        display: none;
+
+        @media (width <= 768px) {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 60px;
+        }
+    }
+
+    &__mobile-section {
+        background: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+        overflow: hidden;
+    }
+
+    &__mobile-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #2a2a2a;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background: #333;
+        }
+
+        &:active {
+            background: #222;
+        }
+    }
+
+    &__mobile-section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__mobile-section-toggle {
+        background: transparent;
+        border: none;
+        color: #ffd700;
+        padding: 4px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &--collapsed {
+            transform: rotate(-90deg);
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &__mobile-section-content {
+        max-height: 2000px;
+        overflow: hidden;
+        transition:
+            max-height 0.3s ease,
+            opacity 0.3s ease,
+            padding 0.3s ease;
+        opacity: 1;
+        padding: 0;
+
+        &--collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+        }
+
+        // Remove padding from child components on mobile
+        .trading-config,
+        .trading-engine,
+        .transaction-history {
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+        }
+    }
+
+    &__sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        max-width: 100%;
+        overflow: visible; // Allow content to be visible
+        min-height: auto; // Let content determine height
+    }
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        max-width: 100%;
+        overflow: visible; // Allow content to be visible
+        min-height: auto; // Let content determine height
+    }
+
+    &__not-authorized {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        padding: 48px 24px;
+    }
+
+    &__not-authorized-content {
+        text-align: center;
+        max-width: 400px;
+
+        svg {
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin: 0 0 12px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #c2c2c2;
+            margin: 0 0 16px;
+            line-height: 1.5;
+        }
+
+        small {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    // Scroll to top button
+    &__scroll-top {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        border: none;
+        border-radius: 50%;
+        color: #0e0e0e;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgb(255 215 0 / 30%);
+        transition: all 0.3s ease;
+        z-index: 1000;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgb(255 215 0 / 40%);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        @media (width <= 768px) {
+            bottom: 80px; // Above mobile navigation
+            right: 16px;
+            width: 44px;
+            height: 44px;
+        }
+    }
+
+    // Mobile specific fixes
+    @media (width <= 768px) {
+        padding: 16px;
+        padding-bottom: 80px; // Padding for mobile navigation
+
+        &__header {
+            margin-bottom: 24px;
+        }
+
+        &__title {
+            font-size: 24px;
+        }
+
+        &__sidebar,
+        &__main {
+            margin-bottom: 24px; // Space between sections
+        }
+    }
+}
+
+// Mobile responsive adjustments for container
+@media (width <= 768px) {
+    .fast-lane-container {
+        height: calc(100vh - 140px); // Account for mobile navigation
+        -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+    }
+}

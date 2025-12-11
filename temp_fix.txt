@@ -1,0 +1,3 @@
+Line 567: for (let run = 1; run <= maxTrades; run++) {
+Line 568: console.log(`📍 Trade ${run}/${maxTrades} - Stake: $${currentStake.toFixed(2)}`);
+Line 614: if (run < maxTrades) {
