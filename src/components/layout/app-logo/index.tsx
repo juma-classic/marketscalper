@@ -7,7 +7,7 @@ export const AppLogo = () => {
     if (!isDesktop) return null;
     return (
         <a
-            href='https://marketscalper-nu.vercel.app'
+            href='https://autotrades.site'
             target='_blank'
             rel='noopener noreferrer'
             className='app-header__logo traders-den-logo'

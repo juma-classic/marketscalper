@@ -38,7 +38,7 @@ const router = createBrowserRouter(
             path='/'
             element={
                 <Suspense
-                    fallback={<ChunkLoader message={localize('Welcome to TradersDen connecting to the server...')} />}
+                    fallback={<ChunkLoader message={localize('Welcome to AutoTrades connecting to the server...')} />}
                 >
                     <TranslationProvider defaultLang='EN' i18nInstance={i18nInstance}>
                         <StoreProvider>
