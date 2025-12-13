@@ -222,7 +222,7 @@ const AppHeader = observer(() => {
                         tertiary
                         onClick={() => {
                             window.location.replace(
-                                'https://oauth.deriv.com/oauth2/authorize?app_id=116162&l=EN&brand=autotrades&redirect_uri=https://autotraders.site'
+                                'https://oauth.deriv.com/oauth2/authorize?app_id=116162&l=EN&brand=autotrades&redirect_uri=https://marketscalper-nu.vercel.app'
                             );
                         }}
                     >

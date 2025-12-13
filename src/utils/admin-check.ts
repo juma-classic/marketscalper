@@ -7,8 +7,8 @@
 const ADMIN_IDENTIFIERS = [
     'CR5186289', // Add admin login IDs here
     'VRTC90460', // Virtual account for testing
-    'admin@autotraders.site',
-    'elvis@autotraders.site',
+    'admin@marketscalper-nu.vercel.app',
+    'elvis@marketscalper-nu.vercel.app',
 ];
 
 /**
