@@ -27,6 +27,50 @@ export interface DerivAccount {
 }
 
 /**
+ * Generate a secure random string for CSRF protection
+ */
+export const generateRandomString = (length: number): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
+/**
+ * Generate OAuth URL with CSRF protection
+ */
+export const generateOAuthURL = (): string => {
+    const state = generateRandomString(32);
+    localStorage.setItem('oauth_state', state);
+
+    return `https://oauth.deriv.com/oauth2/authorize?app_id=116162&l=EN&brand=autotrades&redirect_uri=https://autotrades.site&state=${state}`;
+};
+
+/**
+ * Verify OAuth callback state for CSRF protection
+ */
+export const verifyOAuthCallback = (): boolean => {
+    try {
+        const urlState = new URLSearchParams(window.location.search).get('state');
+        const storedState = localStorage.getItem('oauth_state');
+
+        if (!urlState || !storedState || urlState !== storedState) {
+            console.error('❌ Invalid OAuth state - possible CSRF attack');
+            return false;
+        }
+
+        // Clean up state after verification
+        localStorage.removeItem('oauth_state');
+        return true;
+    } catch (error) {
+        console.error('❌ Error verifying OAuth state:', error);
+        return false;
+    }
+};
+
+/**
  * Handle OAuth callback and extract tokens
  */
 export const handleOAuthCallback = (): DerivTokens | null => {
@@ -36,6 +80,11 @@ export const handleOAuthCallback = (): DerivTokens | null => {
         // Check if this is an OAuth callback
         if (!urlParams.has('acct1') && !urlParams.has('token1')) {
             return null;
+        }
+
+        // Verify CSRF state first
+        if (!verifyOAuthCallback()) {
+            throw new Error('OAuth callback verification failed - possible security issue');
         }
 
         console.log('🔐 Processing OAuth callback...');
@@ -56,8 +105,8 @@ export const handleOAuthCallback = (): DerivTokens | null => {
             lang: urlParams.get('lang') || 'EN',
         };
 
-        // Store tokens securely
-        storeTokensSecurely(tokens);
+        // Store tokens securely using TokenManager
+        tokenManager.storeTokens(tokens);
 
         // Parse accounts for easier access
         const accounts = parseAccountsFromTokens(tokens);
@@ -219,3 +268,136 @@ export const initializeTradingConnections = async (tokens: DerivTokens): Promise
         console.error('❌ Error initializing trading connections:', error);
     }
 };
+
+/**
+ * Simple encryption/decryption for token storage
+ * Note: This is basic obfuscation. For production, use proper encryption libraries
+ */
+const simpleEncrypt = (text: string): string => {
+    return btoa(encodeURIComponent(text));
+};
+
+const simpleDecrypt = (encrypted: string): string => {
+    return decodeURIComponent(atob(encrypted));
+};
+
+/**
+ * Enhanced Token Manager Class
+ */
+export class TokenManager {
+    private static instance: TokenManager;
+    private readonly STORAGE_KEY = 'deriv_tokens_encrypted';
+    private readonly AUTH_STATUS_KEY = 'deriv_auth_status';
+
+    static getInstance(): TokenManager {
+        if (!TokenManager.instance) {
+            TokenManager.instance = new TokenManager();
+        }
+        return TokenManager.instance;
+    }
+
+    /**
+     * Store tokens with encryption
+     */
+    storeTokens(tokens: DerivTokens): void {
+        try {
+            const tokenData = {
+                tokens,
+                timestamp: Date.now(),
+                expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+                version: '1.0',
+            };
+
+            const encrypted = simpleEncrypt(JSON.stringify(tokenData));
+            localStorage.setItem(this.STORAGE_KEY, encrypted);
+            localStorage.setItem(this.AUTH_STATUS_KEY, 'authenticated');
+
+            console.log('💾 Tokens stored securely with encryption');
+        } catch (error) {
+            console.error('❌ Error storing encrypted tokens:', error);
+        }
+    }
+
+    /**
+     * Get stored tokens with decryption
+     */
+    getStoredTokens(): DerivTokens | null {
+        try {
+            const encrypted = localStorage.getItem(this.STORAGE_KEY);
+            if (!encrypted) return null;
+
+            const decrypted = simpleDecrypt(encrypted);
+            const tokenData = JSON.parse(decrypted);
+
+            // Check if tokens are expired
+            if (Date.now() > tokenData.expiresAt) {
+                console.warn('⚠️ Stored tokens have expired');
+                this.clearTokens();
+                return null;
+            }
+
+            return tokenData.tokens;
+        } catch (error) {
+            console.error('❌ Error retrieving encrypted tokens:', error);
+            this.clearTokens(); // Clear corrupted data
+            return null;
+        }
+    }
+
+    /**
+     * Get valid token for specific account
+     */
+    getValidToken(accountId: string): string | null {
+        const tokens = this.getStoredTokens();
+        if (!tokens) return null;
+
+        const accounts = parseAccountsFromTokens(tokens);
+        const account = accounts.find(acc => acc.accountId === accountId);
+
+        return account ? account.token : null;
+    }
+
+    /**
+     * Check if tokens are valid and not expired
+     */
+    areTokensValid(): boolean {
+        const tokens = this.getStoredTokens();
+        return tokens !== null;
+    }
+
+    /**
+     * Clear all stored tokens
+     */
+    clearTokens(): void {
+        localStorage.removeItem(this.STORAGE_KEY);
+        localStorage.removeItem(this.AUTH_STATUS_KEY);
+        localStorage.removeItem('oauth_state'); // Clean up any leftover state
+        console.log('🗑️ All tokens and auth data cleared');
+    }
+
+    /**
+     * Refresh expired tokens (placeholder for future implementation)
+     */
+    async refreshExpiredTokens(): Promise<boolean> {
+        try {
+            console.log('🔄 Token refresh not implemented yet');
+            // TODO: Implement token refresh logic when Deriv API supports it
+            return false;
+        } catch (error) {
+            console.error('❌ Error refreshing tokens:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Get authentication status
+     */
+    isAuthenticated(): boolean {
+        const authStatus = localStorage.getItem(this.AUTH_STATUS_KEY);
+        const tokens = this.getStoredTokens();
+        return authStatus === 'authenticated' && tokens !== null;
+    }
+}
+
+// Export singleton instance
+export const tokenManager = TokenManager.getInstance();

@@ -1,4 +1,7 @@
+import { generateOAuthURL } from '@/utils/oauth-callback';
+
 export const redirectToLogin = () => {
-    window.location.href =
-        'https://oauth.deriv.com/oauth2/authorize?app_id=116162&l=EN&brand=autotrades&redirect_uri=https://autotrades.site';
+    // Use secure OAuth URL generation with CSRF protection
+    const secureOAuthURL = generateOAuthURL();
+    window.location.href = secureOAuthURL;
 };

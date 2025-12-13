@@ -8,6 +8,7 @@ import Modal from '@/components/shared_ui/modal'; // Import the modal component
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
+import { generateOAuthURL } from '@/utils/oauth-callback';
 // import { useOAuth } from '@/hooks/useOAuth';
 import { StandaloneCircleUserRegularIcon } from '@deriv/quill-icons/Standalone';
 import { Localize, useTranslations } from '@deriv-com/translations';
@@ -225,9 +226,9 @@ const AppHeader = observer(() => {
                     <Button
                         tertiary
                         onClick={() => {
-                            window.location.replace(
-                                'https://oauth.deriv.com/oauth2/authorize?app_id=116162&l=EN&brand=autotrades&redirect_uri=https://autotrades.site'
-                            );
+                            // Use secure OAuth URL generation with CSRF protection
+                            const secureOAuthURL = generateOAuthURL();
+                            window.location.replace(secureOAuthURL);
                         }}
                     >
                         <Localize i18n_default_text='Log in' />

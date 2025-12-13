@@ -4,12 +4,11 @@
 
 import { useEffect, useState } from 'react';
 import {
-    clearStoredTokens,
     DerivAccount,
     DerivTokens,
-    getStoredTokens,
     handleOAuthCallback,
     parseAccountsFromTokens,
+    tokenManager,
 } from '@/utils/oauth-callback';
 
 export interface UseOAuthReturn {
@@ -45,8 +44,8 @@ export const useOAuth = (): UseOAuthReturn => {
                     return;
                 }
 
-                // Check for stored tokens
-                const storedTokens = getStoredTokens();
+                // Check for stored tokens using TokenManager
+                const storedTokens = tokenManager.getStoredTokens();
                 if (storedTokens) {
                     setTokens(storedTokens);
                     setAccounts(parseAccountsFromTokens(storedTokens));
@@ -67,7 +66,7 @@ export const useOAuth = (): UseOAuthReturn => {
 
     // Logout function
     const logout = () => {
-        clearStoredTokens();
+        tokenManager.clearTokens();
         setTokens(null);
         setAccounts([]);
         setAuthenticated(false);
@@ -77,7 +76,7 @@ export const useOAuth = (): UseOAuthReturn => {
 
     // Refresh tokens function
     const refreshTokens = () => {
-        const storedTokens = getStoredTokens();
+        const storedTokens = tokenManager.getStoredTokens();
         if (storedTokens) {
             setTokens(storedTokens);
             setAccounts(parseAccountsFromTokens(storedTokens));
