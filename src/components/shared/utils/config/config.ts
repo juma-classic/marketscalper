@@ -24,7 +24,7 @@ export const domain_app_ids = {
     'dbot.deriv.be': APP_IDS.PRODUCTION_BE,
     'dbot.deriv.me': APP_IDS.PRODUCTION_ME,
     'bot.derivlite.com': APP_IDS.LIVE,
-    'autotrades.site': APP_IDS.PRODUCTION, // Your production domain
+    'marketscalper-nu.vercel.app': APP_IDS.PRODUCTION, // Your production domain
 };
 
 export const getCurrentProductionDomain = () =>
