@@ -1,4 +1,4 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { FakeRealModeIndicator } from '@/components/fake-real-account-toggle/FakeRealModeIndicator';
@@ -222,7 +222,7 @@ const AppHeader = observer(() => {
                         tertiary
                         onClick={() => {
                             window.location.replace(
-                                'https://oauth.deriv.com/oauth2/authorize?app_id=82255&l=EN&brand=tradersden'
+                                'https://oauth.deriv.com/oauth2/authorize?app_id=116162&l=EN&brand=autotrades&redirect_uri=https://autotraders.site'
                             );
                         }}
                     >

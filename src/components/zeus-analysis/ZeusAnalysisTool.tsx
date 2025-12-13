@@ -94,7 +94,7 @@ export const ZeusAnalysisTool: React.FC<ZeusAnalysisToolProps> = ({ onNavigateTo
         }
 
         setIsLoading(true);
-        const ws = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=82255');
+        const ws = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=116162');
         wsRef.current = ws;
 
         ws.onopen = () => {

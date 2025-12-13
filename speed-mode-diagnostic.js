@@ -22,7 +22,7 @@ console.log('\n2️⃣ App ID Check:');
 if (appId) {
     console.log('   ✅ App ID:', appId);
 } else {
-    console.log('   ⚠️ No app ID found, will use default: 82255');
+    console.log('   ⚠️ No app ID found, will use default: 116162');
 }
 
 // 3. Check Deriv Login
@@ -81,7 +81,7 @@ if (navigator.onLine) {
 
 // 7. Test Deriv API Connection
 console.log('\n7️⃣ Testing Deriv API Connection...');
-const testWs = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=' + (appId || '82255'));
+const testWs = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=' + (appId || '116162'));
 
 testWs.onopen = () => {
     console.log('   ✅ Successfully connected to Deriv API');
