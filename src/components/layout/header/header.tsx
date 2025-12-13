@@ -8,6 +8,7 @@ import Modal from '@/components/shared_ui/modal'; // Import the modal component
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
+// import { useOAuth } from '@/hooks/useOAuth';
 import { StandaloneCircleUserRegularIcon } from '@deriv/quill-icons/Standalone';
 import { Localize, useTranslations } from '@deriv-com/translations';
 import { Header, useDevice, Wrapper } from '@deriv-com/ui';
@@ -150,6 +151,9 @@ const AppHeader = observer(() => {
     const has_wallet = Object.keys(accounts ?? {}).some(id => accounts?.[id].account_category === 'wallet');
 
     const { localize } = useTranslations();
+
+    // OAuth integration (for future use)
+    // const { isAuthenticated: isOAuthAuthenticated, accounts: oauthAccounts, logout: oauthLogout } = useOAuth();
 
     // const { isOAuth2Enabled } = useOauth2();
 

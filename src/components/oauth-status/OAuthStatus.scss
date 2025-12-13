@@ -1,0 +1,97 @@
+/**
+ * OAuth Status Component Styles
+ */
+
+.oauth-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: rgb(255 255 255 / 10%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgb(255 255 255 / 20%);
+
+    &--loading {
+        color: #ffd700;
+        font-size: 0.9rem;
+    }
+
+    &--authenticated {
+        color: #fff;
+        font-size: 0.85rem;
+    }
+
+    &__info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__indicator {
+        font-size: 0.8rem;
+    }
+
+    &__text {
+        font-weight: 500;
+    }
+
+    &__accounts {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        max-height: 100px;
+        overflow-y: auto;
+    }
+
+    &__account {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: rgb(0 0 0 / 20%);
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    &__account-id {
+        font-family: monospace;
+        font-weight: 600;
+    }
+
+    &__currency {
+        color: #ffd700;
+        font-weight: 500;
+    }
+
+    &__virtual-badge {
+        background: #ff6b6b;
+        color: #fff;
+        padding: 0.1rem 0.3rem;
+        border-radius: 3px;
+        font-size: 0.6rem;
+        font-weight: 600;
+    }
+
+    &__logout {
+        font-size: 0.8rem !important;
+        padding: 0.4rem 0.8rem !important;
+    }
+}
+
+// Mobile responsive
+@media (width <= 768px) {
+    .oauth-status {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem;
+
+        &__accounts {
+            width: 100%;
+        }
+
+        &__account {
+            justify-content: space-between;
+        }
+    }
+}

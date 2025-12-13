@@ -7,6 +7,7 @@ import { StoreProvider } from '@/hooks/useStore';
 import CallbackPage from '@/pages/callback';
 import Endpoint from '@/pages/endpoint';
 import { TAuthData } from '@/types/api-types';
+import { handleOAuthCallback, initializeTradingConnections } from '@/utils/oauth-callback';
 import { initializeI18n, localize, TranslationProvider } from '@deriv-com/translations';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -78,6 +79,28 @@ function App() {
                 survicateBox.style.display = 'none';
             }
         };
+    }, []);
+
+    // Handle OAuth callback on app load
+    useEffect(() => {
+        const processOAuthCallback = async () => {
+            try {
+                const tokens = handleOAuthCallback();
+                if (tokens) {
+                    console.log('🎉 OAuth login successful!');
+
+                    // Initialize trading connections with the received tokens
+                    await initializeTradingConnections(tokens);
+
+                    // Optionally redirect to dashboard or show success message
+                    console.log('✅ Ready for trading!');
+                }
+            } catch (error) {
+                console.error('❌ OAuth callback processing failed:', error);
+            }
+        };
+
+        processOAuthCallback();
     }, []);
 
     useEffect(() => {
