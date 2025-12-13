@@ -24,6 +24,7 @@ export const domain_app_ids = {
     'dbot.deriv.be': APP_IDS.PRODUCTION_BE,
     'dbot.deriv.me': APP_IDS.PRODUCTION_ME,
     'bot.derivlite.com': APP_IDS.LIVE,
+    'autotraders.site': APP_IDS.PRODUCTION, // Your production domain
 };
 
 export const getCurrentProductionDomain = () =>
@@ -115,7 +116,7 @@ export const generateOAuthURL = () => {
     const oauth_url = getOauthURL();
     const original_url = new URL(oauth_url);
     const configured_server_url =
-        LocalStorageUtils.getValue(LocalStorageConstants.configServerURL) ||
+        (LocalStorageUtils.getValue(LocalStorageConstants.configServerURL) as string) ||
         localStorage.getItem('config.server_url') ||
         original_url.hostname;
 
