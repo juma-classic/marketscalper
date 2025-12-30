@@ -114,10 +114,16 @@ export const handleOAuthCallback = (): DerivTokens | null => {
 
         // Track affiliate referral for commission
         if (accounts.length > 0) {
-            const { trackUserReferral } = await import('./affiliate-tracking');
-            accounts.forEach(account => {
-                trackUserReferral(account.accountId, 'oauth_login');
-            });
+            // Use dynamic import without await since this is not critical
+            import('./affiliate-tracking')
+                .then(({ trackUserReferral }) => {
+                    accounts.forEach(account => {
+                        trackUserReferral(account.accountId, 'oauth_login');
+                    });
+                })
+                .catch(error => {
+                    console.warn('Failed to load affiliate tracking:', error);
+                });
         }
 
         // Clean URL (remove OAuth parameters)
