@@ -234,6 +234,19 @@ const AppHeader = observer(() => {
                         <Localize i18n_default_text='Log in' />
                     </Button>
                     <Button
+                        tertiary
+                        onClick={() => {
+                            // Direct Deriv OAuth login
+                            const APP_ID = '110800';
+                            const REDIRECT_URI = 'https://autotrades.site/';
+                            const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+                            window.location.href = oauthUrl;
+                        }}
+                        style={{ marginLeft: '0.5rem' }}
+                    >
+                        <Localize i18n_default_text='OAuth Login' />
+                    </Button>
+                    <Button
                         primary
                         onClick={() => {
                             window.open(standalone_routes.signup);

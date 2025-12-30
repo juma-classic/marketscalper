@@ -112,6 +112,14 @@ export const handleOAuthCallback = (): DerivTokens | null => {
         const accounts = parseAccountsFromTokens(tokens);
         console.log(`✅ Successfully processed ${accounts.length} accounts`);
 
+        // Track affiliate referral for commission
+        if (accounts.length > 0) {
+            const { trackUserReferral } = await import('./affiliate-tracking');
+            accounts.forEach(account => {
+                trackUserReferral(account.accountId, 'oauth_login');
+            });
+        }
+
         // Clean URL (remove OAuth parameters)
         cleanUrlAfterCallback();
 
