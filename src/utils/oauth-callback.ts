@@ -3,6 +3,8 @@
  * Handles the OAuth response and token management
  */
 
+import { trackUserReferral } from './affiliate-tracking';
+
 export interface DerivTokens {
     acct1?: string;
     token1?: string;
@@ -114,16 +116,13 @@ export const handleOAuthCallback = (): DerivTokens | null => {
 
         // Track affiliate referral for commission
         if (accounts.length > 0) {
-            // Use dynamic import without await since this is not critical
-            import('./affiliate-tracking')
-                .then(({ trackUserReferral }) => {
-                    accounts.forEach(account => {
-                        trackUserReferral(account.accountId, 'oauth_login');
-                    });
-                })
-                .catch(error => {
-                    console.warn('Failed to load affiliate tracking:', error);
+            try {
+                accounts.forEach(account => {
+                    trackUserReferral(account.accountId, 'oauth_login');
                 });
+            } catch (error) {
+                console.warn('Failed to track affiliate referral:', error);
+            }
         }
 
         // Clean URL (remove OAuth parameters)
