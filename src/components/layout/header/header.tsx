@@ -242,9 +242,9 @@ const AppHeader = observer(() => {
                             const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
                             window.location.href = oauthUrl;
                         }}
-                        style={{ marginLeft: '0.5rem' }}
+                        style={{ marginLeft: '0.5rem', backgroundColor: '#ff6b6b', color: 'white' }}
                     >
-                        <Localize i18n_default_text='OAuth Login' />
+                        OAuth Login
                     </Button>
                     <Button
                         primary
