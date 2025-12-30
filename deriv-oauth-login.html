@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Deriv OAuth Login</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 40px;
+            }
+            button {
+                padding: 14px 24px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+            #status {
+                margin-top: 20px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <button onclick="loginWithDeriv()">Login with Deriv</button>
+        <div id="status">Not logged in</div>
+
+        <script>
+            // 🔑 DERIV CONFIG (YOUR DETAILS)
+            const APP_ID = '110800';
+            const REDIRECT_URI = 'https://autotrades.site/';
+
+            // 🚀 Login button handler
+            function loginWithDeriv() {
+                const oauthUrl =
+                    `https://oauth.deriv.com/oauth2/authorize` +
+                    `?app_id=${APP_ID}` +
+                    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+
+                window.location.href = oauthUrl;
+            }
+
+            // 🔄 Handle redirect from Deriv
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token1');
+
+            if (token) {
+                document.getElementById('status').innerText = 'Authorizing...';
+                authorizeDeriv(token);
+            }
+
+            // 🔌 WebSocket authorization
+            function authorizeDeriv(token) {
+                const ws = new WebSocket('wss://ws.deriv.com/websockets/v3?app_id=' + APP_ID);
+
+                ws.onopen = () => {
+                    ws.send(
+                        JSON.stringify({
+                            authorize: token,
+                        })
+                    );
+                };
+
+                ws.onmessage = msg => {
+                    const data = JSON.parse(msg.data);
+
+                    if (data.error) {
+                        document.getElementById('status').innerText = 'Authorization failed: ' + data.error.message;
+                        return;
+                    }
+
+                    if (data.msg_type === 'authorize') {
+                        document.getElementById('status').innerText = 'Logged in as: ' + data.authorize.loginid;
+                        console.log('Authorized account data:', data.authorize);
+                    }
+                };
+            }
+        </script>
+    </body>
+</html>
