@@ -6,7 +6,7 @@ import { DBOT_TABS } from '@/constants/bot-contents';
 import { Localize, localize } from '@deriv-com/translations';
 import { rudderStackSendOpenEvent } from '../../../analytics/rudderstack-common-events';
 import { handleOnConfirmAccumulator } from './utils/accumulator-helper-functions';
-import { IconAnnounce } from './announcement-components';
+import { IconAnnounce } from'./announcement-components';
 
 export type TContentItem = {
     id: number;
