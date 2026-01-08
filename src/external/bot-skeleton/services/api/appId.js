@@ -3,7 +3,7 @@ import { getWebSocketURL } from '@/config/api-config';
 import { website_name } from '@/utils/site-config';
 import DerivAPIBasic from '@deriv/deriv-api/dist/DerivAPIBasic';
 import { getInitialLanguage } from '@deriv-com/translations';
-import APIMiddleware from './api-middleware';
+import APIMiddleware from'./api-middleware';
 
 export const generateDerivApiInstance = () => {
     // Use centralized API configuration
