@@ -237,7 +237,7 @@ const AppHeader = observer(() => {
                         tertiary
                         onClick={() => {
                             // Direct Deriv OAuth login
-                            const APP_ID = '110800';
+                            const APP_ID = '116162';
                             const REDIRECT_URI = 'https://autotrades.site/';
                             const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
                             window.location.href = oauthUrl;
