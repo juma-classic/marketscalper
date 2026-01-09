@@ -223,28 +223,15 @@ const AppHeader = observer(() => {
         } else {
             return (
                 <div className='auth-actions'>
-                    <Button
+                      <Button
                         tertiary
                         onClick={() => {
-                            // Use secure OAuth URL generation with CSRF protection
-                            const secureOAuthURL = generateOAuthURL();
-                            window.location.replace(secureOAuthURL);
+                            window.location.replace(
+                                'https://oauth.deriv.com/oauth2/authorize?app_id=1161628&l=EN&brand=tradersden'
+                            );
                         }}
                     >
                         <Localize i18n_default_text='Log in' />
-                    </Button>
-                    <Button
-                        tertiary
-                        onClick={() => {
-                            // Direct Deriv OAuth login
-                            const APP_ID = '116162';
-                            const REDIRECT_URI = 'https://autotrades.site/';
-                            const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-                            window.location.href = oauthUrl;
-                        }}
-                        style={{ marginLeft: '0.5rem', backgroundColor: '#ff6b6b', color: 'white' }}
-                    >
-                        OAuth Login
                     </Button>
                     <Button
                         primary
