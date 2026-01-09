@@ -223,31 +223,16 @@ const AppHeader = observer(() => {
         } else {
             return (
                 <div className='auth-actions'>
-                    <Button
-    tertiary
-    onClick={() => {
-        // Get current origin
-        const currentOrigin = window.location.origin;
-        
-        // Encode the redirect URI (REQUIRED)
-        const redirect_uri = encodeURIComponent(`${currentOrigin}/callback`);
-        
-        // Build the full OAuth URL with ALL required parameters
-        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=1127808&l=EN&brand=deriv&redirect_uri=${redirect_uri}`;
-        
-        // Optional: Add state parameter for security
-        const state = Math.random().toString(36).substring(2);
-        localStorage.setItem('oauth_state', state);
-        const finalUrl = `${oauthUrl}&state=${state}`;
-        
-        console.log('Redirecting to OAuth:', finalUrl);
-        
-        // Redirect to OAuth
-        window.location.href = finalUrl;
-    }}
->
-    <Localize i18n_default_text='Log in' />
-</Button>
+       <Button
+                        tertiary
+                        onClick={() => {
+                            window.location.replace(
+                                'https://oauth.deriv.com/oauth2/authorize?app_id=822558&l=EN&brand=tradersden'
+                            );
+                        }}
+                    >
+                        <Localize i18n_default_text='Log in' />
+                    </Button>
                     <Button
                         primary
                         onClick={() => {
