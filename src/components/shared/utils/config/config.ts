@@ -10,6 +10,7 @@ export const APP_IDS = {
     PRODUCTION_BE: 82255,
     PRODUCTION_ME: 82255,
     LIVE: 80058,
+    MASTERTRADER: 90437,
 };
 
 export const livechat_license_id = 12049137;
@@ -24,7 +25,8 @@ export const domain_app_ids = {
     'dbot.deriv.be': APP_IDS.PRODUCTION_BE,
     'dbot.deriv.me': APP_IDS.PRODUCTION_ME,
     'bot.derivlite.com': APP_IDS.LIVE,
-    'autotrades.site': APP_IDS.PRODUCTION, // Your production domain
+    'mastertrader.com': APP_IDS.MASTERTRADER,
+    'www.mastertrader.com': APP_IDS.MASTERTRADER,
 };
 
 export const getCurrentProductionDomain = () =>
@@ -71,9 +73,18 @@ export const getDefaultAppIdAndUrl = () => {
 export const getAppId = () => {
     let app_id = window.localStorage.getItem('config.app_id');
 
-    if (!app_id || app_id === '80058') {
-        console.warn('⚠️ App ID is invalid, forcing correct App ID...');
-        app_id = '82255';
+    // If not set in localStorage, derive from domain mapping (production domains or mastertrader mapping)
+    if (!app_id) {
+        const { app_id: default_app_id } = getDefaultAppIdAndUrl();
+        app_id = String(default_app_id);
+        window.localStorage.setItem('config.app_id', app_id);
+    }
+
+    // If a legacy or invalid id is present (80058), replace with a sane default
+    if (app_id === '80058') {
+        console.warn('⚠️ App ID is legacy/invalid, replacing with default app id');
+        const { app_id: default_app_id } = getDefaultAppIdAndUrl();
+        app_id = String(default_app_id);
         window.localStorage.setItem('config.app_id', app_id);
     }
 
@@ -116,7 +127,7 @@ export const generateOAuthURL = () => {
     const oauth_url = getOauthURL();
     const original_url = new URL(oauth_url);
     const configured_server_url =
-        (LocalStorageUtils.getValue(LocalStorageConstants.configServerURL) as string) ||
+        LocalStorageUtils.getValue(LocalStorageConstants.configServerURL) ||
         localStorage.getItem('config.server_url') ||
         original_url.hostname;
 
